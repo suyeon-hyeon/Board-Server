@@ -1,29 +1,26 @@
 pipeline {
     agent any
 
-    environment {
-        DISCORD_WEBHOOK = credentials('discord-webhook-url')
-        APP_NAME = 'Board-Server'
-        IMAGE = 'urzor/board-gcp-be:latest'
-        CONTAINER = 'BE'
-        PORT = '8080'
-    }
-
     stages {
         stage("CI/CD start") {
             steps {
                 script {
-                    def AUTHOR_NAME = sh(script: "git show -s --pretty=%an", returnStdout: true).trim()
-                    def AUTHOR_EMAIL = sh(script: "git show -s --pretty=%ae", returnStdout: true).trim()
+                    def Author_ID = sh(script: "git show -s --pretty=%an", returnStdout: true).trim()
+                    def Author_Name = sh(script: "git show -s --pretty=%ae", returnStdout: true).trim()
 
-                    withEnv(["AUTHOR_NAME=${AUTHOR_NAME}", "AUTHOR_EMAIL=${AUTHOR_EMAIL}"]) {
-                        sh(label: 'discord notify start', script: '''
-                            set -e
-                            payload=$(printf '{"content":"📢 CI/CD 시작\\n- App: %s\\n- Job: %s\\n- Build: #%s\\n- Author: %s <%s>\\n- URL: %s"}' \
-                                "$APP_NAME" "$JOB_NAME" "$BUILD_NUMBER" "$AUTHOR_NAME" "$AUTHOR_EMAIL" "$BUILD_URL")
-                            curl -sS -o /dev/null -w "discord http=%{http_code}\n" \
-                                -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK"
-                        ''')
+                    withCredentials([string(credentialsId: 'discord-webhook', variable: 'DISCORD_WEBHOOK')]){
+                        sh """
+                        curl -X POST \
+                            -H "Content-Type: application/json" \
+                            -d '{
+                                    "username": "Jenkins",
+                                    "embeds":[{
+                                        "description": "🚀 **배포 시작입니다**\\n프로젝트: Board-Server\\n브랜치: release\\n요청자: ${Author_ID} (${Author_Name})\\n빌드 번호: #${BUILD_NUMBER}\\n",
+                                        "color": 3447003
+                                    }]
+                                }' \
+                            ${DISCORD_WEBHOOK}
+                        """
                     }
                 }
             }
@@ -63,14 +60,6 @@ pipeline {
 
         stage("Deploy to E2-BE") {
             steps {
-                sh(label: 'discord notify deploy start', script: '''
-                    set -e
-                    payload=$(printf '{"content":"🚀 배포 시작 (BE)\\n- App: %s\\n- Job: %s\\n- Build: #%s\\n- Image: %s\\n- URL: %s"}' \
-                        "$APP_NAME" "$JOB_NAME" "$BUILD_NUMBER" "$IMAGE" "$BUILD_URL")
-                    curl -sS -o /dev/null -w "discord http=%{http_code}\n" \
-                        -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK"
-                ''')
-
                 echo '백엔드 E2에 배포 시작!'
                 // 여기에서는 SSH 플러그인이나 SSH 스크립트를 사용하여 E2로 연결하고 Docker 컨테이너 실행
                 
@@ -80,35 +69,42 @@ pipeline {
                 sh "docker pull urzor/board-gcp-be:latest && docker run -d -p 8080:8080 --name BE urzor/board-gcp-be:latest"
                 
                 echo '백엔드 E2에 배포 완료!'
-                sh(label: 'discord notify deploy success', script: '''
-                    set -e
-                    payload=$(printf '{"content":"🎉 배포 성공 (BE)\\n- App: %s\\n- Container: %s\\n- Port: %s\\n- Image: %s\\n- Build: #%s\\n- URL: %s"}' \
-                        "$APP_NAME" "$CONTAINER" "$PORT" "$IMAGE" "$BUILD_NUMBER" "$BUILD_URL")
-                    curl -sS -o /dev/null -w "discord http=%{http_code}\n" \
-                        -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK"
-                ''')
             }
         }
     }
 
-    post {
-        failure {
-            sh(label: 'discord notify failure', script: '''
-                set -e
-                payload=$(printf '{"content":"❌ 파이프라인 실패\\n- App: %s\\n- Job: %s\\n- Build: #%s\\n- URL: %s\\n- Console에서 실패 지점 확인 ㄱㄱ"}' \
-                    "$APP_NAME" "$JOB_NAME" "$BUILD_NUMBER" "$BUILD_URL")
-                curl -sS -o /dev/null -w "discord http=%{http_code}\n" \
-                     -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK"
-            ''')
+    post{
+        success{
+            withCredentials([string(credentialsId: 'discord-webhook', variable: 'DISCORD_WEBHOOK')]){
+                sh """
+                curl -X POST \
+                    -H "Content-Type: application/json" \
+                    -d '{
+                            "username": "Jenkins",
+                            "embeds":[{
+                                "description": "✅ **🎉 배포 성공 🎉**\\n프로젝트: Board-Server\\n빌드 번호: #${BUILD_NUMBER}\\n**소요 시간**: ${elapsedTime()}초\\n[서비스 바로가기](http://ahddi.shop)\\n",
+                                "color": 5763719
+                            }]
+                        }' \
+                    ${DISCORD_WEBHOOK}
+                """
+            }
         }
-        success {
-            sh(label: 'discord notify success', script: '''
-                set -e
-                payload=$(printf '{"content":"✅ 파이프라인 전체 성공\\n- App: %s\\n- Job: %s\\n- Build: #%s\\n- URL: %s"}' \
-                    "$APP_NAME" "$JOB_NAME" "$BUILD_NUMBER" "$BUILD_URL")
-                curl -sS -o /dev/null -w "discord http=%{http_code}\n" \
-                    -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK"
-            ''')
+        failure{
+            withCredentials([string(credentialsId: 'discord-webhook', variable: 'DISCORD_WEBHOOK')]){
+                sh """
+                curl -X POST \
+                    -H "Content-Type: application/json" \
+                    -d '{
+                            "username": "Jenkins",
+                            "embeds":[{
+                                "description": "❌ ** 배포 실패 ㅜ^ㅜㅜ**\\n프로젝트: Board-Server\\n빌드 번호: #${BUILD_NUMBER}\\n[로그 보기](${BUILD_URL})\\n",
+                                "color": 15548997
+                            }]
+                        }' \
+                    ${DISCORD_WEBHOOK}
+                """
+            }
         }
     }
 }
