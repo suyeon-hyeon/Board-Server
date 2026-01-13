@@ -1,3 +1,5 @@
+def START_TIME
+
 pipeline {
     agent any
 
@@ -82,7 +84,7 @@ pipeline {
                     -d '{
                             "username": "Jenkins",
                             "embeds":[{
-                                "description": "✅ **🎉 배포 성공 🎉**\\n프로젝트: Board-Server\\n빌드 번호: #${BUILD_NUMBER}\\n**소요 시간**: ${elapsedTime()}초\\n[서비스 바로가기](http://ahddi.shop)\\n",
+                                "description": "✅ **🎉 배포 성공 🎉**\\n프로젝트: Board-Server\\n빌드 번호: #${BUILD_NUMBER}\\n**소요 시간**: ${elapsedTime()}초\\n[서비스 바로가기](http://urzor.shop)\\n",
                                 "color": 5763719
                             }]
                         }' \
@@ -107,4 +109,9 @@ pipeline {
             }
         }
     }
+}
+
+def elapsedTime() {
+    def diff = System.currentTimeMillis() - env.START_TIME.toLong()
+    return String.format("%.1f", diff / 1000.0)
 }
