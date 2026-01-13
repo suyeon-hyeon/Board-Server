@@ -7,6 +7,7 @@ pipeline {
         stage("CI/CD start") {
             steps {
                 script {
+                    env.START_TIME = System.currentTimeMillis().toString()
                     def Author_ID = sh(script: "git show -s --pretty=%an", returnStdout: true).trim()
                     def Author_Name = sh(script: "git show -s --pretty=%ae", returnStdout: true).trim()
 
