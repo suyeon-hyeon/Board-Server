@@ -21,7 +21,8 @@ pipeline {
                             set -e
                             payload=$(printf '{"content":"📢 CI/CD 시작\\n- App: %s\\n- Job: %s\\n- Build: #%s\\n- Author: %s <%s>\\n- URL: %s"}' \
                                 "$APP_NAME" "$JOB_NAME" "$BUILD_NUMBER" "$AUTHOR_NAME" "$AUTHOR_EMAIL" "$BUILD_URL")
-                            curl -s -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK" > /dev/null
+                            curl -sS -o /dev/null -w "discord http=%{http_code}\n" \
+                                -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK"
                         ''')
                     }
                 }
@@ -66,7 +67,8 @@ pipeline {
                     set -e
                     payload=$(printf '{"content":"🚀 배포 시작 (BE)\\n- App: %s\\n- Job: %s\\n- Build: #%s\\n- Image: %s\\n- URL: %s"}' \
                         "$APP_NAME" "$JOB_NAME" "$BUILD_NUMBER" "$IMAGE" "$BUILD_URL")
-                    curl -s -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK" > /dev/null
+                    curl -sS -o /dev/null -w "discord http=%{http_code}\n" \
+                        -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK"
                 ''')
 
                 echo '백엔드 E2에 배포 시작!'
@@ -82,7 +84,8 @@ pipeline {
                     set -e
                     payload=$(printf '{"content":"🎉 배포 성공 (BE)\\n- App: %s\\n- Container: %s\\n- Port: %s\\n- Image: %s\\n- Build: #%s\\n- URL: %s"}' \
                         "$APP_NAME" "$CONTAINER" "$PORT" "$IMAGE" "$BUILD_NUMBER" "$BUILD_URL")
-                    curl -s -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK" > /dev/null
+                    curl -sS -o /dev/null -w "discord http=%{http_code}\n" \
+                        -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK"
                 ''')
             }
         }
@@ -94,7 +97,8 @@ pipeline {
                 set -e
                 payload=$(printf '{"content":"❌ 파이프라인 실패\\n- App: %s\\n- Job: %s\\n- Build: #%s\\n- URL: %s\\n- Console에서 실패 지점 확인 ㄱㄱ"}' \
                     "$APP_NAME" "$JOB_NAME" "$BUILD_NUMBER" "$BUILD_URL")
-                curl -s -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK" > /dev/null
+                curl -sS -o /dev/null -w "discord http=%{http_code}\n" \
+                     -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK"
             ''')
         }
         success {
@@ -102,7 +106,8 @@ pipeline {
                 set -e
                 payload=$(printf '{"content":"✅ 파이프라인 전체 성공\\n- App: %s\\n- Job: %s\\n- Build: #%s\\n- URL: %s"}' \
                     "$APP_NAME" "$JOB_NAME" "$BUILD_NUMBER" "$BUILD_URL")
-                curl -s -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK" > /dev/null
+                curl -sS -o /dev/null -w "discord http=%{http_code}\n" \
+                    -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK"
             ''')
         }
     }
