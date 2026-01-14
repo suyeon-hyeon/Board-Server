@@ -37,6 +37,22 @@ pipeline {
             }
         }
 
+        stage("secret.yml download") {
+            steps {
+                withCredentials([file(credentialsId: 'secret-db', variable: 'dbConfigFile')]) {
+                    script {
+                        sh 'cp -rf $dbConfigFile ./BE/src/main/resources/application-db.yml'
+                    }
+                }
+
+                withCredentials([file(credentialsId: 'secret-security', variable: 'securityConfigFile')]) {
+                    script {
+                        sh 'cp -rf $securityConfigFile ./BE/src/main/resources/application-security.yml'
+                    }
+                }
+            }
+        }
+
         stage("Build BE JAR to Docker Image") {
             steps {
                 echo '백엔드 도커 이미지 빌드 시작!'
