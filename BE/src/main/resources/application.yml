@@ -1,0 +1,14 @@
+spring:
+  profiles:
+    active: local
+    group:
+      local: db-local
+      server: db-server
+    include:
+      - db
+      - security
+  datasource:
+    driver-class-name: ${DATABASE_DRIVER}
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
