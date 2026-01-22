@@ -10,6 +10,10 @@ import java.util.Date;
 @Setter
 @ToString
 public class UserDTO {
+    public boolean hasNullDataBeforeRegister(UserDTO userDTO) {
+        return userDTO.getUserId() == null || userDTO.getPassword() == null || userDTO.getNickName() == null;
+    }
+
     public enum Status {
         DEFAULT, ADMIN, DELETED
     }

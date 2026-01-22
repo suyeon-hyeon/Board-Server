@@ -22,4 +22,6 @@ public interface UserProfileMapper {
     public int updatePassword(UserDTO user);
 
     public int updateAddress(UserDTO user);
+
+    int register(UserDTO userProfile);
 }
