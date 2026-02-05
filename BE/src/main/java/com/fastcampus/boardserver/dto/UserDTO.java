@@ -23,7 +23,7 @@ public class UserDTO {
     private String nickName;
     private boolean isAdmin;
     private Date createTime;
-    private boolean isWithdraw;
+    private boolean isWithDraw;
     private Status status;
     private Date updateTime;
 }
