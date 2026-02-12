@@ -11,6 +11,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 @Log4j2
@@ -33,6 +34,32 @@ public class PostServiceImpl implements PostService {
         } else {
             log.error("register ERROR! {}", postDTO);
             throw new RuntimeException("register ERROR! 상품 등록 메서드를 확인해주세요\n" + "Params : " + postDTO);
+        }
+    }
+
+    @Override
+    public List<PostDTO> getMyProducts(int accountId) {
+        List<PostDTO> postDTOList = postMapper.selectMyProducts(accountId);
+        return postDTOList;
+    }
+
+    @Override
+    public void updateProducts(PostDTO postDTO) {
+        if (postDTO != null && postDTO.getId() != 0 && postDTO.getUserId() != 0) {
+            postMapper.updateProducts(postDTO);
+        } else {
+            log.error("updateProducts ERROR! {}", postDTO);
+            throw new RuntimeException("updateProducts ERROR! 물품 변경 메서드를 확인해주세요\n" + "Params : " + postDTO);
+        }
+    }
+
+    @Override
+    public void deleteProduct(int userId, int productId) {
+        if (userId != 0 && productId != 0) {
+            postMapper.deleteProduct(productId);
+        } else {
+            log.error("deleteProduct ERROR! {}", productId);
+            throw new RuntimeException("updateProducts ERROR! 물품 삭제 메서드를 확인해주세요\n" + "Params : " + productId);
         }
     }
 }
