@@ -10,5 +10,5 @@ public interface PostMapper {
     public int register(PostDTO postDTO);
     public List<PostDTO> selectMyProducts(int accountId);
     public void updateProducts(PostDTO postDTO);
-    public void deleteProduct(int productId);
+    public void deleteProduct(int postId);
 }

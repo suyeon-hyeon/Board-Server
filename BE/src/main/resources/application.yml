@@ -22,6 +22,6 @@ spring:
       repositories:
         enabled: false
 expire:
-  defaultTime: 36288000
+  defaultTime: 86400
 mybatis:
   mapper-locations: classpath:com.fastcampus.boardserver.mapper/*.xml
