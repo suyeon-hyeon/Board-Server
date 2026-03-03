@@ -4,18 +4,19 @@
 <mapper namespace="com.fastcampus.boardserver.mapper.TagMapper">
     <insert id="register" parameterType="com.fastcampus.boardserver.dto.TagDTO">
         INSERT INTO `tag`
-        (`postId`,
-         `contents`,
-         `subTagId`)
-        VALUES (#{postId},
-                #{contents},
-                #{subTagId})
+        (`name`,
+         `url`)
+        VALUES (#{name},
+                #{url})
+        <selectKey keyProperty="id" resultType="Integer">
+            SELECT LAST_INSERT_id()
+        </selectKey>
     </insert>
 
     <update id="updateTags" parameterType="com.fastcampus.boardserver.dto.TagDTO">
         UPDATE tag
-        SET contents = #{contents},
-            subTagId = #{subTagId}
+        SET name = #{name},
+            url = #{url}
         WHERE id = #{id}
     </update>
 
@@ -24,4 +25,8 @@
         WHERE id = #{tagId}
     </delete>
 
+    <insert id="createPostTag">
+        INSERT INTO posttag(tagId, postId)
+        VALUES (#{tagId}, #{postId});
+    </insert>
 </mapper>
