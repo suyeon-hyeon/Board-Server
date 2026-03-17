@@ -61,7 +61,7 @@ public class PostController {
                 .views(postRequest.getViews())
                 .categoryId(postRequest.getCategoryId())
                 .userId(memberInfo.getId())
-                .fieldId(postRequest.getFileId())
+                .fileId(postRequest.getFileId())
                 .updateTime(new Date())
                 .build();
         postService.updateProducts(postDTO);
