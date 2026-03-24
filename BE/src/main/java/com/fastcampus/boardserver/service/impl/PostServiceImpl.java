@@ -32,7 +32,7 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private UserProfileMapper userProfileMapper;
 
-//    @CacheEvict(value = "getProducts", allEntries = true)
+    @CacheEvict(value = "getProducts", allEntries = true)
     @Override
     public void register(String id, PostDTO postDTO) {
         UserDTO memberInfo = userProfileMapper.getUserProfile(id);
